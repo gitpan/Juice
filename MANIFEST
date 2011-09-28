@@ -1,5 +1,6 @@
 Changes
 ignore.txt
+Juice-0.01.tar.gz
 lib/Juice.pm
 lib/Juice/Zest.pm
 Makefile.PL
