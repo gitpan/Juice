@@ -3,7 +3,7 @@ package Juice;
 use Juice::Zest; # Zest imports use strict and warnings, as well as 5.010
 
 use base 'Exporter';
-our @EXPORT = qw/_x is_func def func has _s loop/;
+our @EXPORT = qw/_x is_func def func has _s loop squeeze/;
 our $s = {};            # variables are set here
 our $function = {};     # functions here
 
@@ -17,7 +17,7 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 =head1 SYNOPSIS
@@ -58,7 +58,46 @@ Running the above returns:
     x = 5
     Added 1 to x
     x = 6
+=cut
 
+=head2 squeeze
+Adds a 'new' constructor to your package on the fly. If you pass arguments to it in the form 
+of a hash, then it will bless them for you automatically.
+    
+    package MyApp;
+    
+    use Juice;
+
+    squeeze({ name => 'foo' });
+
+    sub get_name {
+        my $self = shift;
+        
+        return $self->{name};
+    }
+    1;
+
+    # test.pl
+    use MyApp;
+    
+    my $j = MyApp->new;
+    print "Hello, $j->{name}\n"; # returns 'Hello, foo'
+=cut
+
+sub squeeze {
+    my $args = shift;
+    my $pkg = caller();
+    my %inself = %{$args};
+    eval qq{
+        package $pkg;
+        sub new {
+            my \$self = {%inself};
+            bless \$self, $pkg;
+            return \$self;
+        }
+    };
+}
+    
 =head2 func
 Creates an anonymous subroutine in $function->{func_name}
 This allows you to run the function from anywhere using _x(func_name)
